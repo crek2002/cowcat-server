@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <!-- 必须的 meta 标签 -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>记事本</title>
+    <!-- Bootstrap 的 CSS 文件 -->
+    <link rel="stylesheet" href="../bootstrap-4.6.1-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/cowcat.css">
+    <script src="../js/jquery-3.2.1.min.js"></script>
+    <script src="../bootstrap-4.6.1-dist/js/bootstrap.min.js"></script>
+    <script src="../bootstrap-4.6.1-dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/vue.global.js"></script>
+    <script src="../js/jquery.form.min.js"></script>
+
+    <style>
+        .mainView{
+            background: #fefefe;
+        }
+        .searchDiv {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            margin-left: 6.0185vw;
+            margin-right: 6.0185vw;
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-control {
+            flex: 1;
+        }
+
+        .addImg {
+            width: 2.4rem;
+            height: 2.4rem;
+            margin-right: 0.5rem;
+        }
+
+        .searchBtn {
+            width: fit-content;
+            margin-left: 0.5rem;
+        }
+
+        .toastDiv {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+        }
+
+        .rounded {
+            width: 30px;
+            height: 30px;
+        }
+
+
+        .fileItemDiv {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding-left: 6.0185vw;
+            padding-right: 6.0185vw;
+        }
+
+        .fileItem {
+            background: #B8DAFF;
+            border-radius: 0.5rem;
+            padding: 0.8rem 1rem 0.8rem 1rem;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .itemLine {
+            display: flex;
+            flex-direction: row;
+            align-items: baseline;
+            min-height: 2.4rem;
+        }
+
+        .leftText {
+            color: #333;
+            width: 30%;
+        }
+
+        .rightText {
+            color: #666;
+            width: 70%;
+            word-wrap: break-word;
+        }
+
+        .btnGroup {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.4rem;
+        }
+
+        .contentTextArea {
+            min-height: 20rem;
+        }
+        .bottomView{
+            height: fit-content;
+            font-size: 2rem;
+            opacity: 0;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="mainView">
+        <div class="searchDiv">
+            <img src="../images/icons8_add_96px.png" class="addImg" v-on:click="showAddDialog" />
+            <input class="form-control" type="search" placeholder="请输入标题或正文" v-model="searchWord"/>
+            <button class="btn btn-success searchBtn" v-on:click="searchNote">搜索</button>
+        </div>
+
+
+        <div class="fileItemDiv" v-for="item in noteList">
+            <div class="fileItem">
+                <div class="itemLine">
+                    <div class="leftText">标题</div>
+                    <div class="rightText">{{item.title}}</div>
+                </div>
+                <div class="itemLine">
+                    <div class="leftText">正文</div>
+                    <div class="rightText">{{item.content}}</div>
+                </div>
+                <div class="itemLine">
+                    <div class="leftText">创建时间</div>
+                    <div class="rightText">{{item.createdTime}}</div>
+                </div>
+                <div class="itemLine">
+                    <div class="leftText">修改时间</div>
+                    <div class="rightText">{{item.updatedTime}}</div>
+                </div>
+                <div class="btnGroup">
+                    <button type="button" class="btn btn-primary btn-sm"
+                        v-on:click="editNote(item.id,item.title,item.content)">编辑</button>
+                    <button type="button" class="btn btn-danger btn-sm"
+                        v-on:click="deleteNote(item.title,item.id)">删除</button>
+                </div>
+            </div>
+        </div>
+        <div class="bottomView">占位</div>
+
+
+        <div class="toastDiv">
+            <div class="toast " role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
+                <div class="toast-header">
+                    <img v-bind:src="toastSrc" class="rounded mr-2" alt="...">
+                    <strong class="mr-auto">提示</strong>
+                    <!--<small>now</small>-->
+                    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="toast-body">
+                    {{tipMsg}}
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">{{modalTitle}}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label for="recipient-name" class="col-form-label">标题</label>
+                                <input type="text" class="form-control" id="recipient-name" v-model="title"
+                                    v-on:input="checkFinish">
+                            </div>
+                            <div class="form-group">
+                                <label for="message-text" class="col-form-label">正文</label>
+                                <textarea class="form-control contentTextArea" id="message-text" v-model="content"
+                                    v-on:input="checkFinish"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" v-on:click="addNote"
+                            v-bind:disabled='flag'>提交</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 删除记事警告框 -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">警告</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        您确定要删除记事“{{deleteNoteName}}”吗？
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-warning" v-on:click="doDeleteNote">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+<script>
+    const vueApp = {
+        data() {
+            return {
+                searchWord:'',//搜索关键词
+                title: '',
+                content: '',
+                tipMsg: '',
+                flag: true,
+                noteList: [],
+                deleteNoteName: '',
+                deleteNoteId: 0,
+                editId: 0,
+                toastSrc: '../images/icons8_ok_96px.png',//toast的图标
+                operation: 'add',//新增add或修改update记事
+                modalTitle:'新增记事'
+            }
+        },
+        mounted() {
+            this.getNoteList()
+        },
+        methods: {
+            showAddDialog() {
+                $('#exampleModal').modal('show')
+                this.operation='add'
+                this.modalTitle='新增记事'
+            },
+            addNote() {
+                let _this = this
+                if ('add' === this.operation) {//新增记事
+                    $.post("../addNote", { userName: localStorage.getItem('userName'), title: this.title, content: this.content }, function (res) {
+                        console.log(res)
+                        if (res.data.isSuccess) {
+                            $('#exampleModal').modal('hide')
+                            location.reload()
+                        } else {
+                            _this.tipMsg = '新增记事失败！'
+                            _this.toastSrc = '../images/icons8_error_96px.png'
+                            $('.toast').toast('show')
+                        }
+
+                    })
+
+                } else if('update'==this.operation){//修改记事
+                    $.post("../updateNote",{id:this.editId,title:this.title,content:this.content},function(res){
+                        console.log(res)
+                        if(res.data.isSuccess){
+                            $('#exampleModal').modal('hide')
+                            location.reload()
+                        }else{
+                            _this.tipMsg = '编辑记事失败！'
+                            _this.toastSrc = '../images/icons8_error_96px.png'
+                            $('.toast').toast('show')
+                        }
+                    })
+                }
+
+            },
+            checkFinish() {
+                if (this.title && this.content) {
+                    this.flag = false
+                } else {
+                    this.flag = true
+                }
+            },
+            getNoteList() {
+                let _this = this
+                $.get("../getNoteList", { userName: localStorage.getItem('userName'), password: localStorage.getItem('password') }, function (res) {
+                    console.log(res)
+                    let list = res.data.data
+                    if (list.length == 0) {
+                        _this.tipMsg = '您尚未添加有任何记事。'
+                        _this.toastSrc = '../images/icons8_error_96px.png'
+                        $('.toast').toast('show')
+                    }
+                    for (let i = 0; i < list.length; i++) {
+                        let createdTime = list[i].createdTime ? _this.dateFormat('yyyy-MM-dd HH:mm:ss', new Date(Number(list[i].createdTime))) : ''
+                        let updatedTime = list[i].updatedTime ? _this.dateFormat('yyyy-MM-dd HH:mm:ss', new Date(Number(list[i].updatedTime))) : ''
+                        _this.noteList.push({
+                            id: list[i].id,
+                            title: list[i].title,
+                            content: list[i].content,
+                            createdTime: createdTime,
+                            updatedTime: updatedTime
+                        })
+                    }
+
+                })
+            },
+            deleteNote(title, id) {
+                this.deleteNoteName = title
+                this.deleteNoteId = id
+                $('#deleteModal').modal('show')
+            },
+            doDeleteNote() {
+                let _this = this
+                $.post("../deleteNote", { id: this.deleteNoteId }, function (res) {
+                    console.log(res)
+                    if (res.data.isSuccess) {
+                        $('#deleteModal').modal('hide')
+                        location.reload()
+                    } else {//删除记事失败
+                        _this.tipMsg = res.data.errorMsg
+                        _this.toastSrc = '../images/icons8_error_96px.png'
+                        $('.toast').toast('show')
+                    }
+
+                })
+            },
+            editNote(id, title, content) {
+                this.editId = id
+                this.title = title
+                this.content = content
+                this.flag = false
+                this.operation='update'
+                this.modalTitle="编辑记事"
+                $('#exampleModal').modal('show')
+            },
+            searchNote(){
+                let _this=this
+                $.get("../searchNote",{keyword:this.searchWord},function(res){
+                    console.log(res)
+                    _this.noteList=[]
+                    let list = res.data.data
+                    if (list.length == 0) {
+                        _this.tipMsg = '未搜索到相关记录。'
+                        _this.toastSrc = '../images/icons8_error_96px.png'
+                        $('.toast').toast('show')
+                    }
+                    for (let i = 0; i < list.length; i++) {
+                        let createdTime = list[i].createdTime ? _this.dateFormat('yyyy-MM-dd HH:mm:ss', new Date(Number(list[i].createdTime))) : ''
+                        let updatedTime = list[i].updatedTime ? _this.dateFormat('yyyy-MM-dd HH:mm:ss', new Date(Number(list[i].updatedTime))) : ''
+                        _this.noteList.push({
+                            id: list[i].id,
+                            title: list[i].title,
+                            content: list[i].content,
+                            createdTime: createdTime,
+                            updatedTime: updatedTime
+                        })
+                    }
+                })
+
+            },
+            dateFormat(fmt, date) {
+                var ret;
+                var opt =
+                {
+                    "y+": date.getFullYear().toString(),        // 年
+                    "M+": (date.getMonth() + 1).toString(),     // 月
+                    "d+": date.getDate().toString(),            // 日
+                    "H+": date.getHours().toString(),           // 时
+                    "m+": date.getMinutes().toString(),         // 分
+                    "s+": date.getSeconds().toString()          // 秒
+                    // 有其他格式化字符需求可以继续添加，必须转化成字符串
+                };
+                for (var k in opt) {
+                    ret = new RegExp("(" + k + ")").exec(fmt);
+                    if (ret) {
+                        fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, "0")))
+                    };
+                };
+                return fmt;
+            }
+
+
+        }
+    }
+
+    Vue.createApp(vueApp).mount(".mainView")
+</script>
+
+</html>

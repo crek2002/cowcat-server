@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <!-- 必须的 meta 标签 -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>密保问题</title>
+    <!-- Bootstrap 的 CSS 文件 -->
+    <link rel="stylesheet" href="../bootstrap-4.6.1-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/cowcat.css">
+    <script src="../js/jquery-3.2.1.min.js"></script>
+    <script src="../bootstrap-4.6.1-dist/js/bootstrap.min.js"></script>
+    <script src="../bootstrap-4.6.1-dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/vue.global.js"></script>
+
+
+    <style>
+        .mainView {
+            background: #FAFAFA;
+            padding-top: 1rem;
+        }
+
+        .questionItemView {
+            margin-left: 6.0185vw;
+            margin-right: 6.0185vw;
+            border-radius: 0.5rem;
+            background: #B8DAFF;
+            padding: 0.8rem 1rem 0.8rem 1rem;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1rem;
+        }
+
+        .itemLine {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .leftText {
+            width: 40%;
+            color: #333;
+        }
+
+        .rightInput {
+            width: 60%;
+            color: #666;
+        }
+
+        .btn {
+            width: 87.963vw;
+            position: absolute;
+            bottom: 2rem;
+            left: 6.0185vw;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="mainView">
+        <div class="questionItemView">
+            <div class="itemLine">
+                <span class="leftText">密保问题一</span><input v-on:input="checkFinish" v-model="question1" v-bind:readonly='isPlain'
+                    placeholder="请输入问题一的内容"
+                    :class="{'rightInput':true, 'form-control-plaintext': isPlain, 'form-control': !isPlain }" />
+            </div>
+            <div class="itemLine">
+                <span class="leftText">答案</span><input v-on:input="checkFinish" v-model="answer1" v-bind:readonly='isPlain'
+                    placeholder="请输入问题一的答案"
+                    :class="{'rightInput':true, 'form-control-plaintext': isPlain, 'form-control': !isPlain }" />
+            </div>
+        </div>
+        <div class="questionItemView">
+            <div class="itemLine">
+                <span class="leftText">密保问题二</span><input v-on:input="checkFinish" v-model="question2" v-bind:readonly='isPlain'
+                    placeholder="请输入问题二的内容"
+                    :class="{'rightInput':true, 'form-control-plaintext': isPlain, 'form-control': !isPlain }" />
+            </div>
+            <div class="itemLine">
+                <span class="leftText">答案</span><input v-on:input="checkFinish" v-model="answer2" v-bind:readonly='isPlain'
+                    placeholder="请输入问题二的答案"
+                    :class="{'rightInput':true, 'form-control-plaintext': isPlain, 'form-control': !isPlain }" />
+            </div>
+        </div>
+        <div class="questionItemView">
+            <div class="itemLine">
+                <span class="leftText">密保问题三</span><input v-on:input="checkFinish" v-model="question3" v-bind:readonly='isPlain'
+                    placeholder="请输入问题三的内容"
+                    :class="{'rightInput':true, 'form-control-plaintext': isPlain, 'form-control': !isPlain }" />
+            </div>
+            <div class="itemLine">
+                <span class="leftText">答案</span><input v-on:input="checkFinish" v-model="answer3" v-bind:readonly='isPlain'
+                    placeholder="请输入问题三的答案"
+                    :class="{'rightInput':true, 'form-control-plaintext': isPlain, 'form-control': !isPlain }" />
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-primary" v-bind:disabled="flag"
+            v-on:click="onBtnClick">{{btnText}}</button>
+
+
+        <div class="toastDiv">
+            <div class="toast " role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
+                <div class="toast-header">
+                    <img src="../images/icons8_attention_48px.png" class="rounded mr-2" alt="...">
+                    <strong class="mr-auto">提示</strong>
+                    <!--<small>now</small>-->
+                    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="toast-body">
+                    {{toastText}}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    const vueApp = {
+        data() {
+            return {
+                flag: false,
+                isPlain: true,
+                question1: '',
+                question2: '',
+                question3: '',
+                answer1: '',
+                answer2: '',
+                answer3: '',
+                btnText: '编辑',
+                toastText: '',
+                isAdd: false//标记是否为新增密保
+            }
+        },
+        mounted() {
+            this.getSecurityQuestion()
+
+        },
+        methods: {
+            onBtnClick() {
+                if (this.isPlain) {
+                    this.isPlain = false
+                    this.btnText = '保存'
+                    this.checkFinish()
+                } else {
+                    let _this = this
+                    let params = {
+                        userName: localStorage.getItem('userName'),
+                        question1: this.question1,
+                        question2: this.question2,
+                        question3: this.question3,
+                        answer1: this.answer1,
+                        answer2: this.answer2,
+                        answer3: this.answer3
+                    }
+
+                    if (_this.isAdd) {//新增密保问题
+                        $.post('../addSecurityQuestions', params, function (res) {
+                            console.log(res)
+                            if (res.data.isSuccess) {
+                                _this.isPlain = true
+                                _this.btnText = '编辑'
+                                _this.isAdd=false
+                            } else {
+                                _this.toastText = res.data.errorMsg
+                                $('.toast').toast('show')
+                            }
+                        })
+                    } else {//修改密保问题
+                        $.post('../updateSecurityQuestion', params, function (res) {
+                            if (res.data.isSuccess) {
+                                _this.isPlain = true
+                                _this.btnText = '编辑'
+                            } else {
+                                _this.toastText = res.data.errorMsg
+                                $('.toast').toast('show')
+                            }
+                        })
+
+                    }
+
+                }
+            },
+            getSecurityQuestion() {
+                let _this = this
+                $.get("../getSecurityQuestion", { userName: localStorage.getItem('userName') }, function (res) {
+                    console.log(res)
+                    if (res.data.isSuccess) {
+                        let list = res.data.data
+                        if (list && list.length === 3) {
+                            console.log("密保的个数为3")
+                            _this.question1 = list[0].question
+                            _this.question2 = list[1].question
+                            _this.question3 = list[2].question
+                            _this.answer1 = list[0].answer
+                            _this.answer2 = list[1].answer
+                            _this.answer3 = list[2].answer
+                            _this.isAdd = false
+                        } else {
+                            _this.toastText = '您尚未设置有密保问题，为了您的账号安全，请点击下方的编辑按钮开启设置流程。'
+                            $('.toast').toast('show')
+                            _this.isAdd = true
+                            console.error("获取密保问题错误")
+                        }
+                    } else {
+                        console.error("获取密保问题请求失败")
+                    }
+                })
+            },
+            checkFinish(){
+                if(this.question1&&this.question2&&this.question3&&this.answer1&&this.answer2&&this.answer3){
+                    this.flag=false
+                }else{
+                    this.flag=true
+                }
+            }
+
+        }
+    }
+
+    Vue.createApp(vueApp).mount(".mainView")
+</script>
+
+</html>

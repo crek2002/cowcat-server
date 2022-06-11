@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <!-- 必须的 meta 标签 -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>下载文件</title>
+    <!-- Bootstrap 的 CSS 文件 -->
+    <link rel="stylesheet" href="../bootstrap-4.6.1-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/cowcat.css">
+    <script src="../js/jquery-3.2.1.min.js"></script>
+    <script src="../bootstrap-4.6.1-dist/js/bootstrap.min.js"></script>
+    <script src="../bootstrap-4.6.1-dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/vue.global.js"></script>
+    <script src="../js/jquery.form.min.js"></script>
+
+    <style>
+        .mainView {
+            background: #fefefe;
+            overflow: scroll;
+        }
+
+        .topDiv {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            min-height: 4rem;
+        }
+
+        .fileItemDiv {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding-left: 6.0185vw;
+            padding-right: 6.0185vw;
+        }
+
+        .fileItem {
+            background: #B8DAFF;
+            border-radius: 0.5rem;
+            padding: 0.8rem 1rem 0.8rem 1rem;
+            width: 100%;        
+            display: flex;
+            flex-direction: column;
+        }
+
+        .itemLine {
+            display: flex;
+            flex-direction: row;
+            align-items: baseline;
+            min-height: 2.4rem;
+        }
+
+        .leftText {
+            color: #333;
+            width: 30%;
+        }
+
+        .rightText {
+            color: #666;
+            width: 70%;
+            word-wrap: break-word;
+        }
+
+        .btnGroup {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.4rem;
+        }
+
+        .toastDiv {
+            position: absolute;
+            left: 50%;    
+            top: 50%;
+            transform: translate(-50%,-50%);
+        }
+
+        .rounded {
+            width: 30px;
+            height: 30px;
+        }
+        .bottomDiv{
+            height: fit-content;
+            background: #666;
+            opacity: 0;
+            font-size: 2rem;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="mainView">
+        <div class="topDiv">所有文件</div>
+        <div class="fileItemDiv" v-for="item in fileList">
+            <div class="fileItem">
+                <div class="itemLine">
+                    <div class="leftText">文件名</div>
+                    <div class="rightText">{{item.fileName}}</div>
+                </div>
+                <div class="itemLine">
+                    <div class="leftText">大小</div>
+                    <div class="rightText">{{item.fileSize}}M</div>
+                </div>
+                <div class="itemLine">
+                    <div class="leftText">修改日期</div>
+                    <div class="rightText">{{item.modifiedDate}}</div>
+                </div>
+                <div class="itemLine">
+                    <div class="leftText">存储路径</div>
+                    <div class="rightText">{{item.filePath}}</div>
+                </div>
+                <div class="btnGroup">
+                    <button type="button" class="btn btn-primary btn-sm"
+                        v-on:click="downloadFile(item.fileName)">下载</button>
+                    <button type="button" class="btn btn-danger btn-sm"
+                        v-on:click="deleteFile(item.fileName)">删除</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottomDiv"><div>占位</div></div>
+
+        <div class="toastDiv">
+            <div class="toast " role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
+                <div class="toast-header">
+                    <img src="../images/icons8_attention_48px.png" class="rounded mr-2" alt="...">
+                    <strong class="mr-auto">提示</strong>
+                    <!--<small>now</small>-->
+                    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="toast-body">
+                    {{tipMsg}}
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 删除文件警告框 -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">警告</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        您确定要删除文件{{deleteFileName}}吗？
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-warning" v-on:click="doDeleteFile">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+    <!--mainView end-->
+</body>
+<script>
+    const vueApp = {
+        data() {
+            return {
+                fileList: [],
+                tipMsg: '',
+                deleteFileName:''
+            }
+        },
+        methods: {
+            downloadFile(fileName) {
+                console.log(fileName)
+                window.location.href = '../downloadFile?fileName=' + fileName
+            },
+
+            deleteFile(fileName) {
+                this.deleteFileName=fileName;
+                $('#exampleModal').modal('show')
+            },
+            doDeleteFile() {    
+                let _this=this        
+                $.post("../deleteFile", { fileName: this.deleteFileName }, function (res) {  
+                    if(res.data.isSuccess) {                    
+                        location.reload()//刷新当前页面
+                    }  else{
+                        _this.tipMsg=`文件${_this.deleteFileName}删除失败！`
+                    }                       
+                    $('#exampleModal').modal('hide')
+                    $('.toast').toast('show')
+                })
+            },
+
+            dateFormat(fmt, date) {
+                var ret;
+                var opt =
+                {
+                    "y+": date.getFullYear().toString(),        // 年
+                    "M+": (date.getMonth() + 1).toString(),     // 月
+                    "d+": date.getDate().toString(),            // 日
+                    "H+": date.getHours().toString(),           // 时
+                    "m+": date.getMinutes().toString(),         // 分
+                    "s+": date.getSeconds().toString()          // 秒
+                    // 有其他格式化字符需求可以继续添加，必须转化成字符串
+                };
+                for (var k in opt) {
+                    ret = new RegExp("(" + k + ")").exec(fmt);
+                    if (ret) {
+                        fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, "0")))
+                    };
+                };
+                return fmt;
+            }
+
+        },
+        created() {
+            console.log("mounted()被回调...")
+            let _this = this
+            $.get("../getFileList", {}, function (res) {
+                console.log(res)
+                if (res.data.isSuccess) {
+                    let list = res.data.data
+                    for (let i = 0; i < list.length; i++) {
+                        let modifiedDate = _this.dateFormat('yyyy-MM-dd HH:mm:ss', new Date(Number(list[i].modifiedDate)))
+                        _this.fileList.push({
+                            dir: list[i].dir,
+                            fileName: list[i].fileName,
+                            fileSize: Number(list[i].fileSize/(1024*1024)).toFixed(4),
+                            modifiedDate: modifiedDate,
+                            filePath:list[i].filePath
+                        })
+                    }
+                } else {
+                    if (res.data.errorCode === 512) {
+                        _this.tipMsg = res.data.errorMsg
+                        $('.toast').toast('show')
+                    }
+                }
+            })
+        }
+    }
+
+    Vue.createApp(vueApp).mount(".mainView")
+</script>
+
+</html>

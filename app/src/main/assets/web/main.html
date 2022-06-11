@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <!-- 必须的 meta 标签 -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>首页</title>
+    <!-- Bootstrap 的 CSS 文件 -->
+    <link rel="stylesheet" href="./bootstrap-4.6.1-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/cowcat.css">
+    <script src="./js/jquery-3.2.1.min.js"></script>
+    <script src="./bootstrap-4.6.1-dist/js/bootstrap.min.js"></script>
+    <script src="./bootstrap-4.6.1-dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./js/vue.global.js"></script>
+    <script src="./js/jquery.form.min.js"></script>
+
+    <style>
+        .line {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding-left: 6.0185vw;
+            min-height: 2.8rem;
+            background: white;
+        }
+
+        img {
+            width: 1.4rem;
+            height: 1.4rem;
+            margin-right: 0.4rem;
+        }
+
+        span {
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .normalDividerView {
+            height: 1px;
+            background: white;
+            padding-left: 6.0185vw;
+            padding-right: 6.0185vw;
+            width: 100%;
+        }
+
+        .divider {
+            background: #eee;
+            height: 1px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="mainView">
+        <div class="line" v-on:click="uploadFile">
+            <img src="./images/icons8_upload_96px.png" />
+            <span>上传文件</span>
+        </div>
+        <div class="normalDividerView">
+            <div class="divider"></div>
+        </div>
+        <div class="line" v-on:click="downloadFile">
+            <img src="./images/icons8_download_96px.png" />
+            <span>下载文件</span>
+        </div>
+        <div class="normalDividerView">
+            <div class="divider"></div>
+        </div>
+        <div class="line" v-on:click="copyBook">
+            <img src="./images/icons8_copybook_96px.png" />
+            <span>记事本</span>
+        </div>
+        <div class="normalDividerView">
+            <div class="divider"></div>
+        </div>
+        <div class="line" v-on:click="profile">
+            <img src="./images/icons8_cat_profile_96px_1.png" />
+            <span>个人资料</span>
+        </div>
+        <div class="normalDividerView">
+            <div class="divider"></div>
+        </div>
+        <div class="line" v-on:click="securityCenter">
+            <img src="./images/icons8_Security_Lock_96px.png" />
+            <span>安全中心</span>
+        </div>
+
+    </div>
+</body>
+<script>
+    const vueApp = {
+        data() {
+            return {
+
+            }
+        },
+        methods: {
+            uploadFile() {
+                window.location.href = './file/uploadFile.html'
+            },
+            downloadFile(){
+                window.location.href = './file/downloadFile.html'
+            },
+            copyBook(){
+                window.location.href = './notebook/notebookMain.html'
+            },
+            profile(){
+                window.location.href = './user/profile.html'
+            },
+            securityCenter(){
+                window.location.href = './securityCenter/securityCenter.html'
+            }
+
+        }
+    }
+
+    Vue.createApp(vueApp).mount(".mainView")
+</script>
+
+</html>

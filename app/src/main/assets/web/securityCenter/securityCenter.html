@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <!-- 必须的 meta 标签 -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>安全中心</title>
+    <!-- Bootstrap 的 CSS 文件 -->
+    <link rel="stylesheet" href="../bootstrap-4.6.1-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/cowcat.css">
+    <script src="../js/jquery-3.2.1.min.js"></script>
+    <script src="../bootstrap-4.6.1-dist/js/bootstrap.min.js"></script>
+    <script src="../bootstrap-4.6.1-dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/vue.global.js"></script>
+
+
+    <style>
+        img {
+            width: 1.4rem;
+            height: 1.4rem;
+            margin-right: 0.4rem;
+        }
+
+        .textSpan {
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .toastDiv {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+        }
+
+        .rounded {
+            width: 30px;
+            height: 30px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="mainView">
+        <div class="line" v-on:click="showPasswordDialog">
+            <img src="../images/icons8_lock_96px.png" />
+            <span class="textSpan">修改密码</span>
+        </div>
+        <div class="normalDividerView">
+            <div class="divider"></div>
+        </div>
+        <div class="line" v-on:click="jumpToSecurityQuestion">
+            <img src="../images/icons8_question_shield_96px.png" />
+            <span class="textSpan">密保问题</span>
+        </div>
+        <div class="normalDividerView">
+            <div class="divider"></div>
+        </div>
+
+
+
+
+        <!-- 修改密码弹框 -->
+        <div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">修改密码</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="oldPassword" class="col-form-label">旧密码:</label>
+                            <input type="password" class="form-control" id="oldPassword" v-model="oldPassword"
+                                v-on:input="checkFinish">
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword" class="col-form-label">新密码:</label>
+                            <input type="password" class="form-control" id="newPassword" v-model="newPassword1"
+                                v-on:input="checkFinish">
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword2" class="col-form-label">确认新密码:</label>
+                            <input type="password" class="form-control" id="newPassword2" v-model="newPassword2"
+                                v-on:input="checkFinish">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" v-bind:disabled="flag"
+                            v-on:click="submitPassword">提交</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="toastDiv">
+            <div class="toast " role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
+                <div class="toast-header">
+                    <img src="../images/icons8_attention_48px.png" class="rounded mr-2" alt="...">
+                    <strong class="mr-auto">提示</strong>
+                    <!--<small>now</small>-->
+                    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="toast-body">
+                    {{toastText}}
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade" id="setPasswordSuccess" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="staticBackdropLabel">提示</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  修改密码成功!
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-primary" v-on:click="jumpToLogin">重新登录</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+    </div>
+</body>
+<script>
+    const vueApp = {
+        data() {
+            return {
+                flag: true,
+                oldPassword: '',
+                newPassword1: '',
+                newPassword2: '',
+                toastText: ''
+            }
+        },
+        methods: {
+            showPasswordDialog() {
+                $('#staticBackdrop').modal('show')
+            },
+            checkFinish() {
+                if (this.oldPassword && this.newPassword1 && this.newPassword2) {
+                    this.flag = false
+                } else {
+                    this.flag = true
+                }
+            },
+            submitPassword() {
+                let _this=this
+                if (this.newPassword1 != this.newPassword2) {
+                    this.toastText = "两次输入的密码不一致。"
+                    $('.toast').toast('show')
+                    return
+                }
+                $.post("../updatePassword", { userId: localStorage.getItem('userId'), newPassword: this.newPassword1, oldPassword: this.oldPassword }, function (res) {
+                    console.log(res)
+                    if (res.data.isSuccess) {
+                        $('#setPasswordSuccess').modal('show')  
+                        $('#staticBackdrop').modal('hide')                
+                    } else {
+                        _this.toastText = res.data.errorMsg
+                        $('.toast').toast('show')
+                    }
+                })
+            },
+            jumpToLogin(){
+                window.location.href='../index.html'
+            },
+            jumpToSecurityQuestion(){
+                window.location.href='./securityQuestion.html'
+            }
+        }
+    }
+
+    Vue.createApp(vueApp).mount(".mainView")
+</script>
+
+</html>

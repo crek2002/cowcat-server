@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <!-- 必须的 meta 标签 -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>上传文件</title>
+    <!-- Bootstrap 的 CSS 文件 -->
+    <link rel="stylesheet" href="../bootstrap-4.6.1-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/cowcat.css">
+    <script src="../js/jquery-3.2.1.min.js"></script>
+    <script src="../bootstrap-4.6.1-dist/js/bootstrap.min.js"></script>
+    <script src="../bootstrap-4.6.1-dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/vue.global.js"></script>
+    <script src="../js/jquery.form.min.js"></script>
+
+    <style>
+        .mainView {
+            background: white;
+            justify-content: space-between;
+        }
+
+        .line {
+            display: flex;
+            flex-direction: row;
+            min-height: 2.8rem;
+            background: white;
+            height: fit-content;
+            padding-left: 0px !important;
+        }
+
+        .leftItem {
+            width: 40%;
+            font-size: 1.1rem;
+            color: #333;
+            display: flex;
+            box-sizing: border-box;
+            padding-left: 6.0185vw;
+            align-items: center;
+        }
+
+        .rightItem {
+            width: 60%;
+            font-size: 1rem;
+            color: #666;
+            display: flex;
+            flex-direction: row;
+            box-sizing: border-box;
+            padding-right: 6.0185vw;
+            justify-content: space-between;
+            align-items: center;
+            word-break: break-all;
+        }
+
+        .fileDiv {
+            height: 100%;
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .fileInput {
+            cursor: pointer;
+            opacity: 0;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+        }
+
+        .normalDividerView {
+            height: 1px;
+            background: white;
+            padding-left: 6.0185vw;
+            padding-right: 6.0185vw;
+            width: 100%;
+        }
+
+        .divider {
+            background: #eee;
+            height: 1px;
+        }
+
+        #uploadBtn {
+            margin-bottom: 3rem;
+            margin-left: 20vw;
+            margin-right: 20vw;
+        }
+
+        .toastDiv {
+            display: flex;
+            justify-content: center;
+        }
+
+        .rounded {
+            width: 30px;
+            height: 30px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="mainView">
+        <form method="post" enctype="multipart/form-data" id="uploadForm">
+            <div class="line">
+                <div class="leftItem">文件</div>
+                <div class="rightItem">
+                    <div class="fileDiv"><input type="file" class="fileInput" name="fileName"
+                            @change="onSelectFile" /><span class="fileTip">请选择</span></div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#999999"
+                        class="bi bi-chevron-right" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                    </svg>
+                </div>
+            </div>
+            <div class="normalDividerView">
+                <div class="divider"></div>
+            </div>
+            <div class="line">
+                <div class="leftItem">文件名</div>
+                <div class="rightItem">{{fileName}}</div>
+            </div>
+            <div class="normalDividerView">
+                <div class="divider"></div>
+            </div>
+            <div class="line">
+                <div class="leftItem">大小</div>
+                <div class="rightItem">{{fileSize}}</div>
+            </div>
+            <div class="normalDividerView">
+                <div class="divider"></div>
+            </div>
+            <div class="line">
+                <div class="leftItem">上传进度</div>
+                <div class="rightItem">{{currPercent}}</div>
+            </div>
+            <input v-model="userName" name="userName" style="display: none;" />
+        </form>
+
+
+
+        <div class="toastDiv">
+            <div class="toast " role="alert" aria-live="assertive" aria-atomic="true" data-delay="2000">
+                <div class="toast-header">
+                    <img src="../images/icons8_ok_96px.png" class="rounded mr-2" alt="...">
+                    <strong class="mr-auto">提示</strong>
+                    <!--<small>now</small>-->
+                    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="toast-body">
+                    恭喜您，文件{{fileName}}上传成功！
+                </div>
+            </div>
+
+        </div>
+
+
+        <button type="button" class="btn btn-primary" id="uploadBtn" v-on:click="uploadFile"
+            v-bind:disabled="flag">开始上传</button>
+
+
+    </div>
+    <!--mainView end-->
+</body>
+<script>
+    const vueApp = {
+        data() {
+            return {
+                flag: true,
+                fileName: '',
+                fileSize: '',
+                currPercent: '',
+                userName: localStorage.getItem('userName')
+            }
+        },
+        created() {
+
+        },
+        methods: {
+            onSelectFile(event) {
+                let file = event.target.files[0]
+                console.log(file);
+                this.flag = !file.name
+                this.fileName = file.name
+                this.fileSize = file.size / 1024 + "KB"
+                this.currPercent = ''
+            },
+            uploadFile() {
+                let _this = this
+                $("#uploadForm").ajaxSubmit({
+                    url: '../uploadFile',
+                    type: 'post',
+                    beforeSubmit: function () {
+
+                    },
+                    uploadProgress(event, position, total, percentComplete) {
+                        console.log(percentComplete)
+                        if (100 === percentComplete) {
+                            $('.toast').toast('show')
+                        }
+                        _this.currPercent = percentComplete + '%'
+                    }
+
+                })
+            },
+
+        }
+    }
+
+    const app = Vue.createApp(vueApp)
+    app.mount(".mainView")
+</script>
+
+</html>

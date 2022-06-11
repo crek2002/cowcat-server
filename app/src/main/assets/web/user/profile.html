@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <!-- 必须的 meta 标签 -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>个人资料</title>
+    <!-- Bootstrap 的 CSS 文件 -->
+    <link rel="stylesheet" href="../bootstrap-4.6.1-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/cowcat.css">
+    <script src="../js/jquery-3.2.1.min.js"></script>
+    <script src="../bootstrap-4.6.1-dist/js/bootstrap.min.js"></script>
+    <script src="../bootstrap-4.6.1-dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/vue.global.js"></script>
+
+
+    <style>
+        .mainView {
+            justify-content: space-between;
+        }
+
+        .topView,
+        .overViewDiv,
+        .editDiv {
+            display: flex;
+            flex-direction: column
+        }
+
+        .bottomView {
+            margin-left: 6.0185vw;
+            margin-right: 6.0185vw;
+            margin-bottom: 2rem;
+        }
+
+        .line {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding-left: 6.0185vw;
+            min-height: 2.8rem;
+            background: white;
+        }
+
+
+        .leftSpan {
+            font-size: 1.1rem;
+            color: #333;
+            width: 40%;
+        }
+
+        .rightSpan {
+            width: 60%;
+            color: #666;
+        }
+
+        .rightDiv {
+            width: 60%;
+            color: #666;
+            padding-right: 6.0185vw;
+            display: flex;
+            align-items: center;
+        }
+
+        .selectSpan {
+            flex: 1;
+            color: #999;
+        }
+
+        .rightInput {
+            width: 100%;
+            font-size: 1rem;
+            border: 0;
+            padding-left: 0;
+            padding-right: 0;
+            color: #666;
+        }
+
+        .normalDividerView {
+            height: 1px;
+            background: white;
+            padding-left: 6.0185vw;
+            padding-right: 6.0185vw;
+            width: 100%;
+        }
+
+        .divider {
+            background: #eee;
+            height: 1px;
+        }
+
+        .maskDiv {
+            width: 100vw;
+            height: 100vh;
+            background: rgba(55, 55, 55, 0.5);
+            position: absolute;
+        }
+
+        .selectDialogView {
+            position: absolute;
+            z-index: 999;
+            bottom: 0;
+            width: 100vw;
+        }
+
+        .dialogDiv {
+            display: flex;
+            flex-direction: column;
+            max-height: 50vh;
+            width: 100vw;
+        }
+
+        .titleDiv {
+            height: 2.8rem;
+            background: #007bff;
+            display: flex;
+            width: 100%;
+            align-items: center;
+            padding-left: 6.0185vw;
+        }
+
+        .titleSpan {
+            display: flex;
+            justify-content: center;
+            height: 100%;
+            align-items: center;
+            color: white;
+            flex-grow: 1;
+        }
+
+        .contentDiv {
+            width: 100vw;
+        }
+
+        .selectItem {
+            width: 100vw;
+            background: white;
+            height: 2.8rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .leftItemSpan {
+            flex-grow: 1;
+            margin-left: 6.0185vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #666;
+        }
+
+        .correctImg {
+            width: 1.4rem;
+            height: 1.4rem;
+            margin-right: 6.0185vw;
+        }
+
+        .toastDiv {
+            position: absolute;
+            left: 50%;    
+            top: 50%;
+            transform: translate(-50%,-50%);
+        }
+
+        .rounded {
+            width: 30px;
+            height: 30px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="mainView">
+        <div class="topView">
+            <div class="overViewDiv" v-if="!showEditView">
+                <div class="line">
+                    <span class="leftSpan">用户名</span>
+                    <span class="rightSpan">{{userName}}</span>
+                </div>
+                <div class="normalDividerView">
+                    <div class="divider"></div>
+                </div>
+                <div class="line">
+                    <span class="leftSpan">真实姓名</span>
+                    <span class="rightSpan">{{trueName}}</span>
+                </div>
+                <div class="normalDividerView">
+                    <div class="divider"></div>
+                </div>
+                <div class="line">
+                    <span class="leftSpan">性别</span>
+                    <span class="rightSpan">{{gender}}</span>
+                </div>
+                <div class="normalDividerView">
+                    <div class="divider"></div>
+                </div>
+                <div class="line">
+                    <span class="leftSpan">年龄</span>
+                    <span class="rightSpan">{{age}}</span>
+                </div>
+                <div class="normalDividerView">
+                    <div class="divider"></div>
+                </div>
+                <div class="line">
+                    <span class="leftSpan">邮箱</span>
+                    <span class="rightSpan">{{email}}</span>
+                </div>
+                <div class="normalDividerView">
+                    <div class="divider"></div>
+                </div>
+                <div class="line">
+                    <span class="leftSpan">住址</span>
+                    <span class="rightSpan">{{address}}</span>
+                </div>
+                <div class="normalDividerView">
+                    <div class="divider"></div>
+                </div>
+            </div>
+            <!--overViewDiv end-->
+
+            <div class="editDiv" v-if="showEditView">
+                <div class="line">
+                    <span class="leftSpan">用户名</span>
+                    <span class="rightSpan">{{userName}}</span>
+                </div>
+                <div class="normalDividerView">
+                    <div class="divider"></div>
+                </div>
+                <div class="line">
+                    <span class="leftSpan">真实姓名</span>
+                    <div class="rightDiv"> <input placeholder="请输入真实姓名" class="rightInput form-control"
+                            v-model="trueName" /></div>
+                </div>
+                <div class="normalDividerView">
+                    <div class="divider"></div>
+                </div>
+                <div class="line" v-on:click="showSelect">
+                    <span class="leftSpan">性别</span>
+                    <div class="rightDiv">
+                        <span class="selectSpan" :style="{color:selectSpanColor}">{{gender}}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#999999"
+                            class="bi bi-chevron-right" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd"
+                                d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="normalDividerView">
+                    <div class="divider"></div>
+                </div>
+                <div class="line">
+                    <span class="leftSpan">年龄</span>
+                    <div class="rightDiv"> <input placeholder="请输入年龄" class="rightInput form-control" v-model="age" />
+                    </div>
+                </div>
+                <div class="normalDividerView">
+                    <div class="divider"></div>
+                </div>
+                <div class="line">
+                    <span class="leftSpan">邮箱</span>
+                    <div class="rightDiv"> <input placeholder="请输入邮箱" class="rightInput form-control" v-model="email" />
+                    </div>
+                </div>
+                <div class="normalDividerView">
+                    <div class="divider"></div>
+                </div>
+                <div class="line">
+                    <span class="leftSpan">住址</span>
+                    <div class="rightDiv"> <input placeholder="请输入住址" class="rightInput form-control"
+                            v-model="address" /></div>
+                </div>
+                <div class="normalDividerView">
+                    <div class="divider"></div>
+                </div>
+
+
+            </div>
+
+        </div>
+        <!--topView end-->
+
+        <div class="bottomView">
+            <button type="button" class="btn btn-primary btn-block" v-on:click="edit">{{btnText}}</button>
+        </div>
+
+        <div class="maskDiv" v-if="showSelectDialog">
+            <div class="selectDialogView">
+                <div class="dialogDiv">
+                    <div class="titleDiv">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#ffffff" class="bi bi-x-lg"
+                            viewBox="0 0 16 16" v-on:click="closeDialog">
+                            <path
+                                d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" />
+                        </svg>
+                        <span class="titleSpan">请选择性别</span>
+                        <span style="margin-right: 6.0185vw;opacity: 0;">占位</span>
+                    </div>
+                    <div class="contentDiv">
+                        <div class="selectItem" v-on:click="selectMale">
+                            <span class="leftItemSpan">男</span>
+                            <img src="../images/icons8_checkmark_96px.png" class="correctImg"
+                                :style="{ visibility: maleIconVisibility}" />
+                        </div>
+                        <div class="normalDividerView">
+                            <div class="divider"></div>
+                        </div>
+                        <div class="selectItem" v-on:click="selectFemale">
+                            <span class="leftItemSpan">女</span>
+                            <img src="../images/icons8_checkmark_96px.png" class="correctImg"
+                                :style="{visibility:feMaleIconVisibility}" />
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="toastDiv">
+            <div class="toast " role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
+                <div class="toast-header">
+                    <img src="../images/icons8_ok_96px.png" class="rounded mr-2" alt="...">
+                    <strong class="mr-auto">提示</strong>
+                    <!--<small>now</small>-->
+                    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="toast-body">
+                    修改成功！
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</body>
+<script>
+    const vueApp = {
+        data() {
+            return {
+                userName: '',
+                trueName: '',
+                gender: '请选择',
+                age: '',
+                email: '',
+                address: '',
+                showEditView: false,
+                showSelectDialog: false,
+                btnText: '编辑个人资料',
+                maleIconVisibility: 'visible',
+                feMaleIconVisibility: 'hidden',
+                selectSpanColor:this.gender=='请选择'?'#999999':'#666666'         
+            }
+        },
+        mounted() {
+            let _this = this
+            $.post("../getUserInfo", { userName: localStorage.getItem('userName'), password: localStorage.getItem('password') }, function (res) {
+                console.log(res)
+                _this.userName = res.data.data.userName
+                _this.trueName = res.data.data.trueName
+                _this.gender = res.data.data.gender
+                _this.age = res.data.data.age
+                _this.email = res.data.data.email
+                _this.address = res.data.data.address
+            })
+
+        },
+        methods: {
+            edit() {
+                if (!this.showEditView) {
+                    this.showEditView = true
+                    this.btnText = '保存',
+                    this.gender='请选择'
+                    this.selectSpanColor='#999999'
+                } else {
+                    let _this = this
+                    let params = {
+                        userId: localStorage.getItem('userId'),
+                        userName: this.userName,
+                        trueName: this.trueName,
+                        gender: this.gender=='请选择'?'':this.gender,
+                        age: this.age,
+                        email: this.email,
+                        address: this.address
+                    }
+                    let userObj=JSON.parse(JSON.stringify(params))//深拷贝
+                    $.post("../updateUserInfo", params, function (res) {
+                        if (res.data.isSuccess) {
+                            _this.showEditView = false
+                            _this.btnText = '编辑个人资料'
+                            _this.trueName=userObj.trueName
+                            _this.gender=userObj.gender
+                            _this.age=userObj.age
+                            _this.email=userObj.email
+                            _this.address=userObj.address 
+                            $('.toast').toast('show')                  
+                        }
+                    })
+                }
+            },
+            showSelect() {
+                this.showSelectDialog = true
+            },
+            closeDialog() {
+                this.showSelectDialog = false
+            },
+            selectMale() {
+                this.maleIconVisibility = 'visible'
+                this.feMaleIconVisibility = 'hidden'
+                this.closeDialog()
+                this.gender = '男'
+                this.selectSpanColor='#666666'
+            },
+            selectFemale() {
+                this.maleIconVisibility = 'hidden'
+                this.feMaleIconVisibility = 'visible'
+                this.closeDialog()
+                this.gender = '女'
+                this.selectSpanColor='#666666'
+            }
+        }
+    }
+
+    Vue.createApp(vueApp).mount(".mainView")
+</script>
+
+</html>

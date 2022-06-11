@@ -1,0 +1,46 @@
+body {
+    padding: 0;
+}
+
+.mainView {
+    height: 100vh;
+    background: linear-gradient(#007bff,#ffffff);
+    display: flex;
+    flex-direction: column;
+}
+
+.line {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 6.0185vw;
+    min-height: 2.8rem;
+    background: white;
+}
+
+.normalDividerView {
+    height: 1px;
+    background: white;
+    padding-left: 6.0185vw;
+    padding-right: 6.0185vw;
+    width: 100%;
+}
+
+.divider {
+    background: #eee;
+    height: 1px;
+}
+
+.toastDiv {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+}
+
+.rounded {
+    width: 30px;
+    height: 30px;
+}
+

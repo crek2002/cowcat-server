@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<litepal>
+    <dbname value="lyy_server.db" />
+    <version value="1" />
+    <list>
+        <mapping class="com.example.lyyserverdemo.domain.LyyUser"/>
+        <mapping class="com.example.lyyserverdemo.domain.LyyFile"/>
+        <mapping class="com.example.lyyserverdemo.domain.Note"/>
+        <mapping class="com.example.lyyserverdemo.domain.SecurityQuestion"/>
+    </list>
+</litepal>
