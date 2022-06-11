@@ -18,6 +18,7 @@
     <style>
         .mainView {
             justify-content: space-between;
+            background: #EDEDED;
         }
 
         .topView,
@@ -40,6 +41,8 @@
             padding-left: 6.0185vw;
             min-height: 2.8rem;
             background: white;
+            padding-top: 0.2rem;
+            padding-bottom: 0.2rem;
         }
 
 
@@ -52,6 +55,7 @@
         .rightSpan {
             width: 60%;
             color: #666;
+            padding-right: 6.0185vw;
         }
 
         .rightDiv {
@@ -158,9 +162,9 @@
 
         .toastDiv {
             position: absolute;
-            left: 50%;    
+            left: 50%;
             top: 50%;
-            transform: translate(-50%,-50%);
+            transform: translate(-50%, -50%);
         }
 
         .rounded {
@@ -252,7 +256,7 @@
                 </div>
                 <div class="line">
                     <span class="leftSpan">年龄</span>
-                    <div class="rightDiv"> <input placeholder="请输入年龄" class="rightInput form-control" v-model="age" />
+                    <div class="rightDiv"> <input placeholder="请输入年龄" class="rightInput form-control" v-model.number="age" oninput="value=value.replace(/[^0-9]/g,'')"/>
                     </div>
                 </div>
                 <div class="normalDividerView">
@@ -343,7 +347,7 @@
             return {
                 userName: '',
                 trueName: '',
-                gender: '请选择',
+                gender: '',
                 age: '',
                 email: '',
                 address: '',
@@ -352,7 +356,7 @@
                 btnText: '编辑个人资料',
                 maleIconVisibility: 'visible',
                 feMaleIconVisibility: 'hidden',
-                selectSpanColor:this.gender=='请选择'?'#999999':'#666666'         
+                selectSpanColor: this.gender == '请选择' ? '#999999' : '#666666'
             }
         },
         mounted() {
@@ -365,6 +369,8 @@
                 _this.age = res.data.data.age
                 _this.email = res.data.data.email
                 _this.address = res.data.data.address
+                _this.maleIconVisibility = _this.gender == "男" ? 'visible' : 'hidden'
+                _this.feMaleIconVisibility = _this.gender == "女" ? 'visible' : 'hidden'
             })
 
         },
@@ -373,30 +379,30 @@
                 if (!this.showEditView) {
                     this.showEditView = true
                     this.btnText = '保存',
-                    this.gender='请选择'
-                    this.selectSpanColor='#999999'
+                    this.gender = this.gender?this.gender:'请选择'
+                    this.selectSpanColor = this.gender=='请选择'?'#999999':'#666666'
                 } else {
                     let _this = this
                     let params = {
                         userId: localStorage.getItem('userId'),
                         userName: this.userName,
                         trueName: this.trueName,
-                        gender: this.gender=='请选择'?'':this.gender,
+                        gender: this.gender == '请选择' ? '' : this.gender,
                         age: this.age,
                         email: this.email,
                         address: this.address
                     }
-                    let userObj=JSON.parse(JSON.stringify(params))//深拷贝
+                    let userObj = JSON.parse(JSON.stringify(params))//深拷贝
                     $.post("../updateUserInfo", params, function (res) {
                         if (res.data.isSuccess) {
                             _this.showEditView = false
                             _this.btnText = '编辑个人资料'
-                            _this.trueName=userObj.trueName
-                            _this.gender=userObj.gender
-                            _this.age=userObj.age
-                            _this.email=userObj.email
-                            _this.address=userObj.address 
-                            $('.toast').toast('show')                  
+                            _this.trueName = userObj.trueName
+                            _this.gender = userObj.gender
+                            _this.age = userObj.age
+                            _this.email = userObj.email
+                            _this.address = userObj.address
+                            $('.toast').toast('show')
                         }
                     })
                 }
@@ -412,15 +418,16 @@
                 this.feMaleIconVisibility = 'hidden'
                 this.closeDialog()
                 this.gender = '男'
-                this.selectSpanColor='#666666'
+                this.selectSpanColor = '#666666'
             },
             selectFemale() {
                 this.maleIconVisibility = 'hidden'
                 this.feMaleIconVisibility = 'visible'
                 this.closeDialog()
                 this.gender = '女'
-                this.selectSpanColor='#666666'
-            }
+                this.selectSpanColor = '#666666'
+            },
+           
         }
     }
 
