@@ -42,7 +42,11 @@ public class LyyServerService extends Service {
                     @Override
                     public void onStarted() {
                         InetAddress localIPAddress = NetUtils.getLocalIPAddress();
-                        LyyServerBroadcastReceiver.onServerStart(LyyServerService.this,localIPAddress.getHostAddress());//服务器启动的时候发送广播
+                        if (localIPAddress!=null){
+                            LyyServerBroadcastReceiver.onServerStart(LyyServerService.this,localIPAddress.getHostAddress());//服务器启动的时候发送广播
+                        }else {
+                            LyyServerBroadcastReceiver.onServerError(LyyServerService.this, "获取网络地址失败，请检查网络连接。");//服务器出现异常的时候发送一条广播
+                        }
                     }
 
                     @Override

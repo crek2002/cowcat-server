@@ -256,7 +256,8 @@
                 </div>
                 <div class="line">
                     <span class="leftSpan">年龄</span>
-                    <div class="rightDiv"> <input placeholder="请输入年龄" class="rightInput form-control" v-model.number="age" oninput="value=value.replace(/[^0-9]/g,'')"/>
+                    <div class="rightDiv"> <input type="tel" placeholder="请输入年龄" class="rightInput form-control"
+                            v-model="age" oninput="value=value.replace(/[^0-9]/g,'')" />
                     </div>
                 </div>
                 <div class="normalDividerView">
@@ -264,7 +265,7 @@
                 </div>
                 <div class="line">
                     <span class="leftSpan">邮箱</span>
-                    <div class="rightDiv"> <input placeholder="请输入邮箱" class="rightInput form-control" v-model="email" />
+                    <div class="rightDiv"> <input  placeholder="请输入邮箱" class="rightInput form-control" v-model="email" @input="onEmailChange($event)"/>
                     </div>
                 </div>
                 <div class="normalDividerView">
@@ -379,8 +380,8 @@
                 if (!this.showEditView) {
                     this.showEditView = true
                     this.btnText = '保存',
-                    this.gender = this.gender?this.gender:'请选择'
-                    this.selectSpanColor = this.gender=='请选择'?'#999999':'#666666'
+                        this.gender = this.gender ? this.gender : '请选择'
+                    this.selectSpanColor = this.gender == '请选择' ? '#999999' : '#666666'
                 } else {
                     let _this = this
                     let params = {
@@ -427,7 +428,10 @@
                 this.gender = '女'
                 this.selectSpanColor = '#666666'
             },
-           
+            onEmailChange(event){
+                console.log(event)
+            }
+
         }
     }
 

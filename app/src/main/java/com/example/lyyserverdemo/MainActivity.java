@@ -12,12 +12,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.DownloadListener;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -47,7 +50,7 @@ public class MainActivity extends LyyBaseActivity {
     private ValueCallback<Uri[]> mUploadMessage5;
     private static final int FILECHOOSER_RESULTCODE_FOR_ANDROID_5 = 5174;
     private static final String TAG = "MainActivity";
-    private LyyServerBroadcastReceiver lyyServerBroadcastReceiver=new LyyServerBroadcastReceiver(new LyyServerBroadcastReceiver.ServerStateListener() {
+    private final LyyServerBroadcastReceiver lyyServerBroadcastReceiver=new LyyServerBroadcastReceiver(new LyyServerBroadcastReceiver.ServerStateListener() {
         @Override
         public void onStart(String hostAddress) {
             LyyLogUtil.logD("服务器已经启动，地址为："+hostAddress);
@@ -75,6 +78,7 @@ public class MainActivity extends LyyBaseActivity {
         public void onError(String error) {
             super.onError(error);
             LyyLogUtil.logE(error);
+            Toast.makeText(MainActivity.this, error, Toast.LENGTH_LONG).show();
         }
     });
 
@@ -89,8 +93,21 @@ public class MainActivity extends LyyBaseActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        webView.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        webView.onPause();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
+        webView.destroy();
         unregisterReceiver(lyyServerBroadcastReceiver);
         stopService(new Intent(this,LyyServerService.class));//停止服务
     }
@@ -100,7 +117,18 @@ public class MainActivity extends LyyBaseActivity {
         progressDialog.setCancelable(false);
         progressDialog.setMessage("正在停止服务...");
         toolbar=findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(R.drawable.ic_chevron_left);
         setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (webView!=null){
+                    if (webView.canGoBack()){
+                        webView.goBack();
+                    }
+                }
+            }
+        });
         webView=findViewById(R.id.webView);
         WebSettings settings = webView.getSettings();
         settings.setDomStorageEnabled(true);
@@ -108,7 +136,23 @@ public class MainActivity extends LyyBaseActivity {
         settings.setAllowFileAccess(true);
         settings.setAppCacheEnabled(true);
         settings.setJavaScriptEnabled(true);
-        webView.setWebViewClient(new WebViewClient());
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);//不使用缓存，永远从网络上加载最新的内容
+        webView.setWebViewClient(new WebViewClient(){
+            @Override
+            public void onPageFinished(WebView view, String url) {//网页加载完成回调
+                super.onPageFinished(view, url);
+                if (webView.canGoBack()){
+                    toolbar.setNavigationIcon(R.drawable.ic_chevron_left);
+                }else {
+                    toolbar.setNavigationIcon(null);
+                }
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return super.shouldOverrideUrlLoading(view, request);
+            }
+        });
         webView.setWebChromeClient(new WebChromeClient(){
             @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {//让WebView支持file input上传文件
@@ -127,6 +171,14 @@ public class MainActivity extends LyyBaseActivity {
                     return false;
                 }
                 return true;
+            }
+
+            @Override
+            public void onReceivedTitle(WebView view, String title) {//改变标题
+                super.onReceivedTitle(view, title);
+                if (!TextUtils.isEmpty(title)){
+                    toolbar.setTitle(title);
+                }
             }
         });
         webView.setDownloadListener(new DownloadListener() {//让WebView支持下载（跳转到浏览器下载）
