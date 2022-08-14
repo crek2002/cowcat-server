@@ -1,7 +1,6 @@
 package com.example.lyyserverdemo.utils;
 
 import android.app.Activity;
-import android.os.Process;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +41,6 @@ public class LyyActivityUtil {
                 activity.finish();
             }
         }
-        Process.killProcess(Process.myPid());//杀掉当前进程
+        //Process.killProcess(Process.myPid());//杀掉当前进程
     }
 }

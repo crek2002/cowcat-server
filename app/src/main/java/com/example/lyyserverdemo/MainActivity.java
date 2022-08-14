@@ -1,6 +1,7 @@
 package com.example.lyyserverdemo;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
@@ -35,6 +36,7 @@ import androidx.core.content.ContextCompat;
 
 import com.example.lyyserverdemo.broadcastreceiver.LyyServerBroadcastReceiver;
 import com.example.lyyserverdemo.lyyframework.LyyBaseActivity;
+import com.example.lyyserverdemo.lyyframework.widget.LyyDialog;
 import com.example.lyyserverdemo.service.LyyServerService;
 import com.example.lyyserverdemo.utils.LyyActivityUtil;
 import com.example.lyyserverdemo.utils.LyyLogUtil;
@@ -210,7 +212,21 @@ public class MainActivity extends LyyBaseActivity {
             stopService(new Intent(this,LyyServerService.class));//停止服务
             progressDialog.show();
         }else if (itemId==R.id.exit){
-            LyyActivityUtil.getInstance().exitApp();//退出程序
+            LyyDialog lyyDialog = new LyyDialog(this);
+            lyyDialog.setContent("您确定要退出程序吗？");
+            lyyDialog.setOnClickListener(new LyyDialog.OnClickListener() {
+                @Override
+                public void onCancel(Dialog lyyDialog) {
+                    lyyDialog.dismiss();
+                }
+
+                @Override
+                public void onConfirm(Dialog lyyDialog) {
+                    lyyDialog.dismiss();
+                    LyyActivityUtil.getInstance().exitApp();
+                }
+            });
+            lyyDialog.show();
         }
         return true;
     }
