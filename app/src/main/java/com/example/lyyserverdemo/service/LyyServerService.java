@@ -1,5 +1,7 @@
 package com.example.lyyserverdemo.service;
 
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
+
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -68,7 +70,12 @@ public class LyyServerService extends Service {
             notificationManager.createNotificationChannel(notificationChannel);
         }
         Intent intent=new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        PendingIntent pendingIntent=null;
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.S){
+            pendingIntent = PendingIntent.getActivity(this, 0, intent, FLAG_IMMUTABLE);
+        }else {
+            pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        }
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "my_service");
         builder.setContentTitle("Cowcat");
         builder.setContentText("Cowcat服务器已经启动...");
